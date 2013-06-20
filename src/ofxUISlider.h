@@ -47,6 +47,18 @@ public:
         init(_name, _min, _max, _value, w, h, x, y);
     }
     
+    ofxUISlider(string _name, int _min, int _max, int _value, float w, float h, float x = 0, float y = 0) : ofxUIWidgetWithLabel()
+    {
+        useReference = false;
+        init(_name, _min, _max, &_value, w, h, x, y);
+    }
+    
+    ofxUISlider(string _name, int _min, int _max, int *_value, float w, float h, float x = 0, float y = 0) : ofxUIWidgetWithLabel()
+    {
+        useReference = true;
+        init(_name, _min, _max, _value, w, h, x, y);
+    }
+    
     // DON'T USE THE NEXT CONSTRUCTORS
     // This is maintained for backward compatibility and will be removed on future releases
     
@@ -88,6 +100,7 @@ public:
     
     virtual void init(string _name, float _min, float _max, float *_value, float w, float h, float x, float y)
     {
+        integer=false;
         rect = new ofxUIRectangle(x,y,w,h);
         name = string(_name);  				
 		if(w > h)
@@ -145,11 +158,72 @@ public:
         increment = fabs(max - min) / 100.0;
     }
     
+    virtual void init(string _name, int _min, int _max, int *_value, float w, float h, float x, float y)
+    {
+        integer=true;
+        
+        rect = new ofxUIRectangle(x,y,w,h);
+        name = string(_name);
+		if(w > h)
+		{
+			kind = OFX_UI_WIDGET_SLIDER_H;
+		}
+		else
+		{
+			kind = OFX_UI_WIDGET_SLIDER_V;
+		}
+        
+		paddedRect = new ofxUIRectangle(-padding, -padding, w+padding*2.0, h+padding);
+		paddedRect->setParent(rect);
+        
+        draw_fill = true;
+        
+        value = *_value;                                               //the widget's value
+        if(useReference)
+        {
+            valueRefInteger = _value;
+        }
+        else
+        {
+            valueRefInteger = new int();
+            *valueRefInteger = value;
+        }
+        
+		max = _max;
+		min = _min;
+        labelPrecision = 0;
+        
+		if(value > max)
+		{
+			value = max;
+		}
+		if(value < min)
+		{
+			value = min;
+		}
+		
+		value = ofxUIMap(value, min, max, 0.0, 1.0, true);
+        
+		if(kind == OFX_UI_WIDGET_SLIDER_H)
+		{
+			label = new ofxUILabel(0,h+padding,string(name+" LABEL"), string(name + ": " + ofxUIToString(max,labelPrecision)), OFX_UI_FONT_SMALL);
+		}
+		else
+		{
+			label = new ofxUILabel(0,h+padding,string(name+" LABEL"), string(name), OFX_UI_FONT_SMALL);
+		}
+        
+		label->setParent(label);
+		label->setRectParent(rect);
+        label->setEmbedded(true);
+        increment = fabs(max - min) / 100.0;
+    }
+    
     virtual void update()
     {
         if(useReference)
         {
-            value = ofxUIMap(*valueRef, min, max, 0.0, 1.0, true);
+            value = ofxUIMap(integer?(*valueRefInteger):(*valueRef), min, max, 0.0, 1.0, true);
             updateLabel(); 
         }
     }
@@ -350,6 +424,11 @@ public:
 		increment = _increment; 
 	}
     
+    void setIncrement(int _increment)
+	{
+		increment = _increment;
+	}
+    
 	virtual void input(float x, float y)
 	{
 		if(kind == OFX_UI_WIDGET_SLIDER_H)
@@ -376,7 +455,10 @@ public:
     
     void updateValueRef()
     {
-        (*valueRef) = getScaledValue();  
+        if(integer)
+            (*valueRefInteger) = getScaledValueInteger();
+        else
+            (*valueRef) = getScaledValue();  
     }    
 
 	virtual void updateLabel()
@@ -426,7 +508,10 @@ public:
 	
 	void setValue(float _value)
 	{
-		value = ofxUIMap(_value, min, max, 0.0, 1.0, true);		
+        if(integer)
+            value = ofxUIMap((int)_value, min, max, 0.0, 1.0, true);
+        else
+            value = ofxUIMap(_value, min, max, 0.0, 1.0, true);		
         updateValueRef();        
 		updateLabel(); 		
 	}
@@ -444,6 +529,11 @@ public:
 	float getScaledValue()
 	{
 		return ofxUIMap(value, 0.0, 1.0, min, max, true); 
+	}
+    
+    int getScaledValueInteger()
+	{
+		return (int)ofxUIMap(value, 0.0, 1.0, min, max, true);
 	}
     
 	ofxUILabel *getLabel()
@@ -531,6 +621,8 @@ protected:    //inherited: ofxUIRectangle *rect; ofxUIWidget *parent;
     bool useReference;     
 	float max, min;  
     int labelPrecision;
+    bool integer;
+    int *valueRefInteger;
 }; 
 
 #endif

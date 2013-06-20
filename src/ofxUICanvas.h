@@ -1456,6 +1456,36 @@ public:
         return widget;
     }
     
+    /*---------------------------------------*/
+    ofxUISlider* addSlider(string _name, int _min, int _max, int _value)
+    {
+        ofxUISlider* widget = new ofxUISlider(_name, _min, _max, _value, rect->getWidth()-widgetSpacing*2, globalSliderHeight, 0, 0);
+        addWidgetPosition(widget, widgetPosition, widgetAlign);
+        return widget;
+    }
+    
+    ofxUISlider* addSlider(string _name, int _min, int _max, int _value, float w, float h, float x = 0, float y = 0)
+    {
+        ofxUISlider* widget = new ofxUISlider(_name, _min, _max, _value, w, h, x, y);
+        addWidgetPosition(widget, widgetPosition, widgetAlign);
+        return widget;
+    }
+    
+    ofxUISlider* addSlider(string _name, int _min, int _max, int *_value)
+    {
+        ofxUISlider* widget = new ofxUISlider(_name, _min, _max, _value, rect->getWidth()-widgetSpacing*2, globalSliderHeight, 0, 0);
+        addWidgetPosition(widget, widgetPosition, widgetAlign);
+        return widget;
+    }
+    
+    ofxUISlider* addSlider(string _name, int _min, int _max, int *_value, float w, float h, float x = 0, float y = 0)
+    {
+        ofxUISlider* widget = new ofxUISlider(_name, _min, _max, _value, w, h, x, y);
+        addWidgetPosition(widget, widgetPosition, widgetAlign);
+        return widget;
+    }
+    /*--------------------------------------------*/
+    
     ofxUIRotarySlider* addRotarySlider(string _name, float _min, float _max, float _value, int _size = OFX_UI_FONT_SMALL)
     {
         ofxUIRotarySlider* widget = new ofxUIRotarySlider(rect->getWidth()-widgetSpacing*2, _min, _max, _value, _name, _size); 
@@ -1584,6 +1614,37 @@ public:
         addWidgetPosition(widget, widgetPosition, widgetAlign);
         return widget;
     }
+    /*--------------------------------------*/
+    ofxUIRangeSlider* addRangeSlider(string _name, int _min, int _max, int _valuelow, int _valuehigh)
+    {
+        ofxUIRangeSlider* widget = new ofxUIRangeSlider(_name, _min, _max, _valuelow, _valuehigh, rect->getWidth()-widgetSpacing*2, globalSliderHeight, 0, 0);
+        addWidgetPosition(widget, widgetPosition, widgetAlign);
+        return widget;
+    }
+    
+    ofxUIRangeSlider* addRangeSlider(string _name, int _min, int _max, int _valuelow, int _valuehigh,
+                                     float w, float h, float x = 0, float y = 0)
+    {
+        ofxUIRangeSlider* widget = new ofxUIRangeSlider(_name, _min, _max, _valuelow, _valuehigh, w, h, x, y);
+        addWidgetPosition(widget, widgetPosition, widgetAlign);
+        return widget;
+    }
+    
+    ofxUIRangeSlider* addRangeSlider(string _name, int _min, int _max, int *_valuelow, int *_valuehigh)
+    {
+        ofxUIRangeSlider* widget = new ofxUIRangeSlider(_name, _min, _max, _valuelow, _valuehigh, rect->getWidth()-widgetSpacing*2, globalSliderHeight, 0, 0);
+        addWidgetPosition(widget, widgetPosition, widgetAlign);
+        return widget;
+    }
+    
+    ofxUIRangeSlider* addRangeSlider(string _name, int _min, int _max, int *_valuelow, int *_valuehigh,
+                                     float w, float h, float x = 0, float y = 0)
+    {
+        ofxUIRangeSlider* widget = new ofxUIRangeSlider(_name, _min, _max, _valuelow, _valuehigh, w, h, x, y);
+        addWidgetPosition(widget, widgetPosition, widgetAlign);
+        return widget;
+    }
+    /*-------------------------------------------*/
 
     ofxUIFPSSlider* addFPSSlider(string _name, float _max = 400)
     {

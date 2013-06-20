@@ -43,6 +43,20 @@ public:
         useReference = true;                         
         init(_name, _min, _max, _valuelow, _valuehigh, w, h, x, y, _size);
     }
+    
+    ofxUIRangeSlider(string _name, int _min, int _max, int _valuelow, int _valuehigh, float w, float h,
+                     float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL) : ofxUIWidgetWithLabel()
+    {
+        useReference = false;
+        init(_name, _min, _max, &_valuelow, &_valuehigh, w, h, x, y, _size);
+    }
+    
+    ofxUIRangeSlider(string _name, int _min, int _max, int *_valuelow, int *_valuehigh, float w, float h,
+                     float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL) : ofxUIWidgetWithLabel()
+    {
+        useReference = true;
+        init(_name, _min, _max, _valuelow, _valuehigh, w, h, x, y, _size);
+    }
 
     // DON'T USE THE NEXT CONSTRUCTORS
     // This is maintained for backward compatibility and will be removed on future releases
@@ -84,9 +98,11 @@ public:
         }        
     }
     
-    void init(string _name, float _min, float _max, float *_valuelow, float *_valuehigh, float w, float h, 
+    void init(string _name, float _min, float _max, float *_valuelow, float *_valuehigh, float w, float h,
               float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL)
     {
+        integer =false;
+        
         rect = new ofxUIRectangle(x,y,w,h);
         name = string(_name);  				
 		if(w > h)
@@ -163,12 +179,93 @@ public:
         increment = fabs(max - min) / 10.0;
     }
     
+    void init(string _name, int _min, int _max, int *_valuelow, int *_valuehigh, float w, float h,
+              float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL)
+    {
+        integer =true;
+        
+        rect = new ofxUIRectangle(x,y,w,h);
+        name = string(_name);
+		if(w > h)
+		{
+			kind = OFX_UI_WIDGET_RSLIDER_H;
+		}
+		else
+		{
+			kind = OFX_UI_WIDGET_RSLIDER_V;
+		}
+		
+		paddedRect = new ofxUIRectangle(-padding, -padding, w+padding*2.0, h+padding);
+		paddedRect->setParent(rect);
+		
+        draw_fill = true;
+        
+        valuelow = *_valuelow;                                                  //the widget's value
+        valuehigh = *_valuehigh;                                                //the widget's value
+        
+        if(useReference)
+        {
+            valuelowRefInteger = _valuelow;
+            valuehighRefInteger = _valuehigh;
+        }
+        else
+        {
+            valuelowRefInteger = new int();
+            valuehighRefInteger = new int();
+            *valuelowRef = valuelow;
+            *valuehighRef = valuehigh;
+        }
+		
+		max = _max;
+		min = _min;
+		hitHigh = false;
+		hitLow = false;
+		hitCenter = false;
+		
+		if(valuelow > max)
+		{
+			valuelow = max;
+		}
+		if(valuelow < min)
+		{
+			valuelow = min;
+		}
+		
+		if(valuehigh > max)
+		{
+			valuehigh = max;
+		}
+		if(valuehigh < min)
+		{
+			valuehigh = min;
+		}
+		
+		valuelow = ofxUIMap(valuelow, min, max, 0.0, 1.0, true);
+		valuehigh = ofxUIMap(valuehigh, min, max, 0.0, 1.0, true);
+		labelPrecision = 0;
+        
+		if(kind == OFX_UI_WIDGET_RSLIDER_H)
+		{
+			label = new ofxUILabel(0,h+padding,(name+" LABEL"), (name + ": " + ofxUIToString(getScaledValueLow(),labelPrecision) + " " + ofxUIToString(getScaledValueHigh(),labelPrecision)), _size);
+		}
+		else
+		{
+			label = new ofxUILabel(0,h+padding,(name+" LABEL"), name, _size);
+		}
+		
+		label->setParent(label);
+		label->setRectParent(rect);
+        label->setEmbedded(true);
+        
+        increment = fabs(max - min) / 10.0;
+    }
+    
     virtual void update()
     {
         if(useReference)
         {
-            valuelow = ofxUIMap(*valuelowRef, min, max, 0.0, 1.0, true); 
-            valuehigh = ofxUIMap(*valuehighRef, min, max, 0.0, 1.0, true);         
+            valuelow = ofxUIMap(integer?(*valuelowRefInteger):(*valuelowRef), min, max, 0.0, 1.0, true);
+            valuehigh = ofxUIMap(integer?(*valuehighRefInteger):(*valuehighRef), min, max, 0.0, 1.0, true);
         }
     }
     
@@ -346,6 +443,11 @@ public:
 	{
 		increment = _increment; 
 	}
+    
+    void setIncrement(int _increment)
+	{
+		increment = _increment;
+	}
 
 	void input(float x, float y)
 	{
@@ -432,8 +534,14 @@ public:
 	
     void updateValueRef()
     {
-        (*valuelowRef) = getScaledValueLow();  
-        (*valuehighRef) = getScaledValueHigh();          
+        if(integer){
+            (*valuelowRefInteger) = getScaledValueLowInteger();
+            (*valuehighRefInteger) = getScaledValueHighInteger();
+        }
+        else{
+            (*valuelowRef) = getScaledValueLow();
+            (*valuehighRef) = getScaledValueHigh();
+        }
     }
 
 	void updateLabel()
@@ -497,16 +605,22 @@ public:
     }
     
 	void setValueLow(float _value)
-	{			
-		valuelow = ofxUIMap(_value, min, max, 0.0, 1.0, true); 
-        updateValueRef(); 
+	{
+        if(integer)
+            valuelow = ofxUIMap((int)_value, min, max, 0.0, 1.0, true);
+        else
+            valuelow = ofxUIMap(_value, min, max, 0.0, 1.0, true);
+        updateValueRef();
 		updateLabel(); 		
 	}
 
 	void setValueHigh(float _value)
 	{
-		valuehigh = ofxUIMap(_value, min, max, 0.0, 1.0, true); 
-        updateValueRef(); 
+        if(integer)
+            valuehigh = ofxUIMap((int)_value, min, max, 0.0, 1.0, true);
+        else
+            valuehigh = ofxUIMap(_value, min, max, 0.0, 1.0, true);
+        updateValueRef();
 		updateLabel(); 		
 	}
 	
@@ -528,6 +642,16 @@ public:
 	float getScaledValueHigh()
 	{
 		return ofxUIMap(valuehigh, 0.0, 1.0, min, max, true); 
+	}
+    
+    float getScaledValueLowInteger()
+	{
+		return (int)ofxUIMap(valuelow, 0.0, 1.0, min, max, true);
+	}
+    
+	float getScaledValueHighInteger()
+	{
+		return (int)ofxUIMap(valuehigh, 0.0, 1.0, min, max, true);
 	}
 	
 	ofxUILabel *getLabel()
@@ -599,7 +723,10 @@ protected:    //inherited: ofxUIRectangle *rect; ofxUIWidget *parent;
 	bool hitHigh, hitLow, hitCenter; 
 	float hitPoint; 
 	float max, min; 
-    int labelPrecision;        
+    int labelPrecision;
+    bool integer;
+    int *valuelowRefInteger;
+    int *valuehighRefInteger;
 }; 
 
 #endif
