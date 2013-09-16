@@ -212,8 +212,8 @@ public:
         {
             valuelowRefInteger = new int();
             valuehighRefInteger = new int();
-            *valuelowRef = valuelow;
-            *valuehighRef = valuehigh;
+            *valuelowRefInteger = valuelow;
+            *valuehighRefInteger = valuehigh;
         }
 		
 		max = _max;

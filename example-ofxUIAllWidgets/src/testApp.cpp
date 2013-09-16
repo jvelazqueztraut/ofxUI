@@ -314,8 +314,12 @@ void testApp::setGUI1()
 	gui1->addToggle( "D_GRID", false, dim, dim);
     
     gui1->addSpacer(length-xInit, 2);
-    gui1->addWidgetDown(new ofxUILabel("RANGE SLIDER", OFX_UI_FONT_MEDIUM)); 
-	gui1->addRangeSlider("RSLIDER", 0.0, 255.0, 50.0, 100.0, length-xInit,dim);
+    gui1->addWidgetDown(new ofxUILabel("RANGE SLIDER FLOAT", OFX_UI_FONT_MEDIUM)); 
+	gui1->addRangeSlider("RSLIDER", (float)0.0, (float)255.0, (float)50.0, (float)100.0, length-xInit,dim);
+    
+    gui1->addSpacer(length-xInit, 2);
+    gui1->addWidgetDown(new ofxUILabel("RANGE SLIDER INT", OFX_UI_FONT_MEDIUM));
+	gui1->addRangeSlider("RSLIDER", (int)0, (int)255, (int)50, (int)100, length-xInit,dim);
 
     gui1->addSpacer(length-xInit, 2);
 	gui1->addWidgetDown(new ofxUILabel("2D PAD", OFX_UI_FONT_MEDIUM)); 

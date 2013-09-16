@@ -621,7 +621,7 @@ protected:    //inherited: ofxUIRectangle *rect; ofxUIWidget *parent;
     bool useReference;     
 	float max, min;  
     int labelPrecision;
-    bool integer;
+    bool integer=false;
     int *valueRefInteger;
 }; 
 
